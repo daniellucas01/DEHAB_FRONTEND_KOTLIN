@@ -9,10 +9,10 @@
     <item
         android:id="@+id/navigation_history"
         android:icon="@drawable/ic_history_black_24dp"
-        android:title="@string/title_history" />
+        android:title="@string/title_transaction" />
 
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_transactions"
         android:icon="@drawable/ic_attach_money_black_24dp"
         android:title="@string/title_transaction" />
 </menu>
