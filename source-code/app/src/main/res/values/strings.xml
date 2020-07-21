@@ -3,10 +3,26 @@
     <string name="title_home">Home</string>
     <string name="title_history">History</string>
     <string name="title_transaction">Transaction</string>
+    <string name="error_label">Error!</string>
+    <string name="ok_label">OK</string>
+    <string name="existing_wallet_message">Sorry, there is already an existing wallet located in your phone. Loading existing wallet will be executed</string>
+    <string name="wallet_exists_title">Wallet Exists</string>
+    <string name="invalid_directory">Sorry, the following directory does not exist</string>
+    <string name="invalid_wallet_password_title">INVALID WALLET PASSWORD!</string>
+    <string name="invalid_wallet_password">Sorry, the following wallet password is incorrect. Please try again</string>
+    <string name="no_wallet_file_label">Sorry, no wallet file has been detected in your phone, please create one and load afterwards</string>
+    <string name="ether_count_placeholder">%s Ether</string>
+    <string name="money_count_placeholder">USD($) %s</string>
+
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- TODO: Default Project Folder Name-->
     <string name="file_folder">DEHAB Wallet</string>
+    <string name="wallet_password_label">Wallet Password</string>
+    <string name="username_label">Username</string>
+    <string name="password_label">Password</string>
+    <string name="decrypt_wallet_label">Decrypt Wallet</string>
 
 </resources>

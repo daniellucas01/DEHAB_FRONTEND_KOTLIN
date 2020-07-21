@@ -12,22 +12,21 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
+        android:layout_marginTop="72dp"
         android:layout_marginEnd="28dp"
         android:text="Create Wallet"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/load_wallet_button"
-        app:layout_constraintVertical_bias="0.144" />
-    
+        app:layout_constraintTop_toBottomOf="@+id/load_wallet_button" />
+
     <Button
         android:id="@+id/load_wallet_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
-        android:layout_marginTop="292dp"
+        android:layout_marginTop="232dp"
         android:layout_marginEnd="28dp"
         android:text="Load Wallet"
         android:textSize="16sp"
