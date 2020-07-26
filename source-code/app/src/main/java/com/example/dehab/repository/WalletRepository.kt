@@ -1,19 +1,13 @@
 package com.example.dehab.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.dehab.model.WalletDataModel
-import com.example.dehab.ui.Constants
-import io.reactivex.Completable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import okio.blackholeSink
-import org.web3j.abi.datatypes.Address
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.WalletUtils
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.utils.Convert
 import java.math.BigInteger

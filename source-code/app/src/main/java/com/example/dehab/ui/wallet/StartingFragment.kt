@@ -62,7 +62,7 @@ class StartingFragment : Fragment() {
         val contents : Array<File>? = walletDirectory.listFiles()
         if (contents == null) {
             //The directory is not really a directory
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(resources.getString(R.string.error_label))
                 .setMessage(resources.getString(R.string.invalid_directory))
                 .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
@@ -84,7 +84,7 @@ class StartingFragment : Fragment() {
         }
         else {
             //File is empty or no wallet file
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(resources.getString(R.string.error_label))
                 .setMessage(resources.getString(R.string.no_wallet_file_label))
                 .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->

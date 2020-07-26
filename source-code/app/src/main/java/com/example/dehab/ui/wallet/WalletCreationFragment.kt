@@ -9,18 +9,28 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.example.dehab.Constants
 import com.example.dehab.R
 import com.example.dehab.databinding.FragmentWalletCreationBinding
+import com.example.dehab.model.NewUserModel
+import com.example.dehab.repository.KeyProviderApiRepository
 import com.fondesa.kpermissions.allGranted
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.web3j.crypto.WalletUtils
 import java.io.File
 
 class WalletCreationFragment : Fragment() {
     private lateinit var _binding : FragmentWalletCreationBinding
     private val binding get() = _binding
+    private var apiRepository = KeyProviderApiRepository
+
     companion object {
         fun newInstance() = WalletCreationFragment()
     }
@@ -37,32 +47,118 @@ class WalletCreationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val folderName = "Eth_Wallet"
         binding.createWalletButton.setOnClickListener() {
-            val walletPassword = binding.walletPasswordTextbox.text.toString()
             permissionsBuilder(Manifest.permission.WRITE_EXTERNAL_STORAGE).build().send { result ->
-
                 if (result.allGranted()) {
-                    var walletDirectory = File(Environment.getExternalStorageDirectory(), "/$folderName")
+                    val walletDirectory = File(Environment.getExternalStorageDirectory(), "/${Constants.folderName}")
                     createFolder(walletDirectory)
-                    try {
-                        val ethereumWallet = generateWallet(walletDirectory, walletPassword, view)
-                        walletDirectory = File(walletDirectory, "/$ethereumWallet")
-                        val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(walletDirectory.toString())
-                        view.findNavController().navigate(action)
-                    }
-                    catch (error : Exception) {
-                        MaterialAlertDialogBuilder(context)
-                            .setTitle(resources.getString(R.string.error_label))
-                            .setMessage(error.toString())
-                            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                    userSignUp(
+                        binding.usernameTextbox.text.toString(),
+                        binding.passwordTextBox.text.toString(),
+                        binding.walletPasswordTextbox.text.toString(),
+                        walletDirectory,
+                        view
+                    )
+//                    try {
+//                        val ethereumWallet = generateWallet(walletDirectory, walletPassword, view)
+//                        walletDirectory = File(walletDirectory, "/$ethereumWallet")
+//                        val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(walletDirectory.toString())
+//                        view.findNavController().navigate(action)
+//                    }
+//                    catch (error : Exception) {
+//                        MaterialAlertDialogBuilder(requireContext())
+//                            .setTitle(resources.getString(R.string.error_label))
+//                            .setMessage(error.toString())
+//                            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+//
+//                            }
+//                            .show()
+//                    }
+                }
+            }
+        }
+    }
 
-                            }
-                            .show()
+    private fun userSignUp (username: String, password: String, walletPassword : String, walletDirectory: File, view: View) {
+
+        if (!formValidation()) {
+            return
+        }
+        else {
+            CoroutineScope(IO).launch {
+                val register = apiRepository.registerUser(
+                    NewUserModel(
+                        username,
+                        password,
+                        1
+                    )
+                )
+                withContext(Main) {
+                    if (register) {
+                        Log.d("Daniel", "Register succesfull")
+                    }
+                    else {
+                        Log.d("Daniel", "Register failure")
                     }
                 }
             }
         }
+//        try {
+//            val ethereumWallet = generateWallet(walletDirectory, walletPassword, view)
+//            val newWalletDirectory = File(walletDirectory, "/$ethereumWallet")
+//            val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(newWalletDirectory.toString())
+//            view.findNavController().navigate(action)
+//        }
+//        catch (error : Exception) {
+//            MaterialAlertDialogBuilder(requireContext())
+//                .setTitle(resources.getString(R.string.error_label))
+//                .setMessage(error.toString())
+//                .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+//
+//                }
+//                .show()
+//        }
+    }
+
+    private fun formValidation() : Boolean {
+        var validation = true
+        //Content
+        val username = binding.usernameTextbox.text.toString()
+        val password = binding.passwordTextBox.text.toString()
+        val walletPassword = binding.walletPasswordTextbox.text.toString()
+        //Outline
+        val usernameOutline = binding.usernameTextboxOutline
+        val passwordOutline = binding.passwordTextBoxOutline
+        val walletPasswordOutline = binding.walletPasswordTextboxOutline
+        // If username is empty
+        if(username.isEmpty()) {
+            usernameOutline.error = "Please fill in your username"
+            validation = false
+        }
+        else {
+            usernameOutline.error = null
+        }
+        // If password is empty
+        if(password.isEmpty()) {
+            passwordOutline.error = "Please fill in your password"
+            validation = false
+        }
+
+        else {
+            passwordOutline.error = null
+        }
+        // If wallet is empty
+        if(walletPassword.isEmpty()) {
+            walletPasswordOutline.error = "Please fill in your wallet password"
+            validation = false
+        }
+        else {
+            walletPasswordOutline.error = null
+        }
+
+
+
+        return validation
     }
 
     private fun generateWallet(walletDirectory: File , password : String, view: View) : String {
@@ -70,7 +166,7 @@ class WalletCreationFragment : Fragment() {
         val contents : Array<File>? = walletDirectory.listFiles()
         if (contents == null) {
             //The directory is not really a directory
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(resources.getString(R.string.error_label))
                 .setMessage(resources.getString(R.string.invalid_directory))
                 .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
@@ -84,7 +180,7 @@ class WalletCreationFragment : Fragment() {
             }
         }
         if (name != "") {
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(resources.getString(R.string.wallet_exists_title))
                 .setMessage(resources.getString(R.string.existing_wallet_message))
                 .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->

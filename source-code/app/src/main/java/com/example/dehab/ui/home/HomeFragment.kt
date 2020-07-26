@@ -1,6 +1,5 @@
 package com.example.dehab.ui.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,28 +8,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dehab.MainViewModel
 import com.example.dehab.databinding.FragmentHomeBinding
-import com.example.dehab.ui.Constants
+import com.example.dehab.Constants
 import com.example.dehab.ui.home.wallet_card.WalletCardAdapter
 import com.example.dehab.ui.home.wallet_card.WalletCardItems
-import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import org.web3j.crypto.Credentials
-import org.web3j.crypto.Wallet
-import org.web3j.crypto.WalletUtils
-import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameter
-import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.methods.response.Web3ClientVersion
-import org.web3j.protocol.http.HttpService
-import org.web3j.utils.Convert
 import java.math.BigDecimal
-import java.math.BigInteger
 
 
 class HomeFragment : Fragment() {

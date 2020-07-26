@@ -63,7 +63,7 @@ class LoadingWalletFragment : Fragment() {
             startActivity(intent)
         }
         catch (error: CipherException) {
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(resources.getString(R.string.invalid_wallet_password_title))
                 .setMessage(resources.getString(R.string.invalid_wallet_password))
                 .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
