@@ -12,24 +12,30 @@ import androidx.navigation.findNavController
 import com.example.dehab.Constants
 import com.example.dehab.R
 import com.example.dehab.databinding.FragmentWalletCreationBinding
+import com.example.dehab.model.ErrorResponseModel
 import com.example.dehab.model.NewUserModel
 import com.example.dehab.repository.KeyProviderApiRepository
 import com.fondesa.kpermissions.allGranted
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import org.web3j.crypto.WalletUtils
+import retrofit2.Response
 import java.io.File
 
 class WalletCreationFragment : Fragment() {
     private lateinit var _binding : FragmentWalletCreationBinding
     private val binding get() = _binding
     private var apiRepository = KeyProviderApiRepository
+    private lateinit var finalWalletDirectory : File
 
     companion object {
         fun newInstance() = WalletCreationFragment()
@@ -84,9 +90,15 @@ class WalletCreationFragment : Fragment() {
         if (!formValidation()) {
             return
         }
+
+        if (!tryGeneratingWallet(walletDirectory, walletPassword,view)){
+            return
+        }
+
         else {
             CoroutineScope(IO).launch {
                 val register = apiRepository.registerUser(
+
                     NewUserModel(
                         username,
                         password,
@@ -94,30 +106,52 @@ class WalletCreationFragment : Fragment() {
                     )
                 )
                 withContext(Main) {
-                    if (register) {
-                        Log.d("Daniel", "Register succesfull")
+                    if (register.isSuccessful) {
+                        val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(finalWalletDirectory.toString())
+                        view.findNavController().navigate(action)
                     }
                     else {
-                        Log.d("Daniel", "Register failure")
+                        handlingResponseCodes(register)
                     }
                 }
             }
         }
-//        try {
-//            val ethereumWallet = generateWallet(walletDirectory, walletPassword, view)
-//            val newWalletDirectory = File(walletDirectory, "/$ethereumWallet")
-//            val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(newWalletDirectory.toString())
-//            view.findNavController().navigate(action)
-//        }
-//        catch (error : Exception) {
-//            MaterialAlertDialogBuilder(requireContext())
-//                .setTitle(resources.getString(R.string.error_label))
-//                .setMessage(error.toString())
-//                .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
-//
-//                }
-//                .show()
-//        }
+    }
+
+    private fun handlingResponseCodes (response: Response<Void>) {
+        val gson = Gson()
+        val type = object : TypeToken<ErrorResponseModel>() {}.type
+        val errorResponse: ErrorResponseModel = gson.fromJson(response.errorBody()!!.charStream(), type)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(response.code().toString() + " " + resources.getString(R.string.error_label))
+            .setMessage(errorResponse.message)
+            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+
+            }
+            .show()
+    }
+
+    private fun tryGeneratingWallet(walletDirectory: File, walletPassword : String, view : View): Boolean {
+        try {
+            val ethereumWallet = generateWallet(walletDirectory, walletPassword, view)
+            if (ethereumWallet.isEmpty() || ethereumWallet == "") {
+                return false
+            }
+            else {
+                finalWalletDirectory = File(walletDirectory, "/$ethereumWallet")
+                return true
+            }
+        }
+        catch (error : Exception) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(resources.getString(R.string.error_label))
+                .setMessage(error.toString())
+                .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+
+                }
+                .show()
+            return false
+        }
     }
 
     private fun formValidation() : Boolean {
@@ -179,6 +213,7 @@ class WalletCreationFragment : Fragment() {
                 name = f.name
             }
         }
+
         if (name != "") {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(resources.getString(R.string.wallet_exists_title))
@@ -187,7 +222,7 @@ class WalletCreationFragment : Fragment() {
 
                 }
                 .show()
-            return name
+            return ""
         }
         else {
             val mWalletDirectory = WalletUtils.generateLightNewWalletFile(password, walletDirectory)

@@ -5,7 +5,7 @@
     <string name="title_transaction">Transaction</string>
     <string name="error_label">Error!</string>
     <string name="ok_label">OK</string>
-    <string name="existing_wallet_message">Sorry, there is already an existing wallet located in your phone. Loading existing wallet will be executed</string>
+    <string name="existing_wallet_message">Sorry, there is already an existing wallet located in your phone.</string>
     <string name="wallet_exists_title">Wallet Exists</string>
     <string name="invalid_directory">Sorry, the following directory does not exist</string>
     <string name="invalid_wallet_password_title">INVALID WALLET PASSWORD!</string>
@@ -24,5 +24,8 @@
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
     <string name="decrypt_wallet_label">Decrypt Wallet</string>
+    <string name="amount_hint">Amount?</string>
+    <string name="receipient_hint">Receipient</string>
+    <string name="unit_hint">Unit</string>
 
 </resources>

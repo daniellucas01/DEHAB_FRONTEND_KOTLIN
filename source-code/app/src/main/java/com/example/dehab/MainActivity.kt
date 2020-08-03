@@ -9,6 +9,8 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.dehab.repository.WalletSingleton
+import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +34,8 @@ class MainActivity : AppCompatActivity() {
         val intent : Intent = intent
         val walletPassword = intent.getStringExtra("password")
         val walletDirectory = intent.getStringExtra("wallet_directory")
+        val credentials1 = Credentials.create("f15fb2252bd1836dd7cad56089bf3f83228c4c881b031f855af47acb611a6adc")
         val credentials = WalletUtils.loadCredentials(walletPassword, walletDirectory)
-        viewModel.setWalletCredentials(credentials)
+        viewModel.setWalletCredentials(WalletSingleton.walletCredentials)
     }
 }

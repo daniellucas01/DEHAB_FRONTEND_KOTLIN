@@ -1,21 +1,20 @@
 package com.example.dehab.repository
 
 import com.example.dehab.model.NewUserModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
+import retrofit2.Response
 
 object KeyProviderApiRepository {
     private var apiInstance = RetrofitSingleton.instance
 
-    suspend fun registerUser(user : NewUserModel) : Boolean  {
-        val webResponse = apiInstance.createNewUser(user).await()
-        return webResponse.isSuccessful
-//        CoroutineScope(IO).launch {
-//            val webResponse = apiInstance.createNewUser(user).await()
-//            withContext(Main) {
-//                return@withContext webResponse.isSuccessful
-//            }
-//        }
+    suspend fun registerUser(user : NewUserModel) : Response<Void>  {
+        return apiInstance.createNewUser(user).await()
+    }
+
+    suspend fun loginUser (username: String, password: String) : Response<Void> {
+        return apiInstance.loginUser(username, password).await()
+    }
+
+    suspend fun getUserWallet (user : NewUserModel) {
+
     }
 }

@@ -1,5 +1,6 @@
 package com.example.dehab.ui.wallet
 
+import android.Manifest
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -13,6 +14,9 @@ import com.example.dehab.R
 
 import com.example.dehab.databinding.FragmentStartingBinding
 import com.example.dehab.ui.CustomLoadingDialog
+import com.fondesa.kpermissions.allGranted
+import com.fondesa.kpermissions.extension.permissionsBuilder
+import com.fondesa.kpermissions.extension.send
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_starting.view.*
 import org.web3j.crypto.WalletUtils
@@ -51,8 +55,11 @@ class StartingFragment : Fragment() {
             //Animation Start
             val folderName = "Eth_Wallet"
             val walletFolderDirectory = File(Environment.getExternalStorageDirectory(), "/$folderName")
-            prepareLoadWallet(walletFolderDirectory, view)
-            //Process
+            permissionsBuilder(Manifest.permission.WRITE_EXTERNAL_STORAGE).build().send { result ->
+                if (result.allGranted()) {
+                    prepareLoadWallet(walletFolderDirectory, view)
+                }
+            }
         }
     }
 

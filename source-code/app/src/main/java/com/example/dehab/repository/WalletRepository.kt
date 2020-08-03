@@ -1,6 +1,9 @@
 package com.example.dehab.repository
 
+import android.app.usage.ConfigurationStats
+import android.util.Log
 import androidx.lifecycle.LiveData
+import com.example.dehab.Constants
 import com.example.dehab.model.WalletDataModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -24,6 +27,7 @@ object WalletRepository {
                     CoroutineScope(IO + theJob).launch {
                         val web3 = WalletSingleton.web3
                         val address = credentials.address
+                        Log.d(Constants.AUTHOR_NAME, address)
                         val balance = web3.ethGetBalance(address, DefaultBlockParameterName.LATEST).sendAsync().get()
                         withContext(Main) {
                             val wei = balance.balance.toBigDecimal()
@@ -34,6 +38,15 @@ object WalletRepository {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    fun getPrivateKey (credentials : Credentials) : LiveData<BigInteger> {
+        return object : LiveData<BigInteger>() {
+            override fun onActive() {
+                super.onActive()
+                value = credentials.ecKeyPair.privateKey
             }
         }
     }
