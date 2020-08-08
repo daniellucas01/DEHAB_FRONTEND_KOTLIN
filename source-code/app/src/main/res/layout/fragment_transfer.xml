@@ -7,6 +7,7 @@
     tools:context=".ui.transaction.transfer.TransferFragment">
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/transfer_unit_dropdown_outline"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

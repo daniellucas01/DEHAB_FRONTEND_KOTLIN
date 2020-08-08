@@ -15,11 +15,59 @@
         android:id="@+id/navigation_history"
         android:name="com.example.dehab.ui.history.HistoryFragment"
         android:label="@string/title_history"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/viewTransactionDetail"
+            app:destination="@id/transactionDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_transactions"
         android:name="com.example.dehab.ui.transaction.TransactionFragment"
         android:label="@string/title_transaction"
-        tools:layout="@layout/fragment_transaction" />
+        tools:layout="@layout/fragment_transaction" >
+        <action
+            android:id="@+id/transactionConfirmationDirection"
+            app:destination="@id/transactionConfirmationFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/transactionConfirmationFragment"
+        android:name="com.example.dehab.ui.transaction.confirmation.TransactionConfirmationFragment"
+        android:label="Transaction Summary"
+        tools:layout="@layout/fragment_transaction_confirmation">
+        <action
+            android:id="@+id/finishingTransactionDirection"
+            app:destination="@id/navigation_transactions" />
+        <argument
+            android:name="transactionType"
+            app:argType="string"
+            android:defaultValue='""' />
+        <argument
+            android:name="amount"
+            app:argType="string"
+            android:defaultValue='""' />
+        <argument
+            android:name="unit"
+            app:argType="string"
+            android:defaultValue='""' />
+        <argument android:name="address" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionDetailFragment"
+        android:name="com.example.dehab.ui.history.recycler_view.TransactionDetailFragment"
+        android:label="Transaction Detail"
+        tools:layout="@layout/fragment_transaction_detail" >
+        <argument
+            android:name="transaction_number"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
 </navigation>

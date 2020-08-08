@@ -10,11 +10,22 @@
     <string name="invalid_directory">Sorry, the following directory does not exist</string>
     <string name="invalid_wallet_password_title">INVALID WALLET PASSWORD!</string>
     <string name="invalid_wallet_password">Sorry, the following wallet password is incorrect. Please try again</string>
+    <string name="no_wallet_file_title">No wallet!</string>
     <string name="no_wallet_file_label">Sorry, no wallet file has been detected in your phone, please create one and load afterwards</string>
     <string name="ether_count_placeholder">%s Ether</string>
     <string name="money_count_placeholder">USD($) %s</string>
 
+    <!-- TODO: Transaction -->
+    <string name="confirmation_transaction_error_title">Sorry!</string>
+    <string name="confirmation_transaction_error_message">Error creating transction, reverting back to main layout</string>
+    <string name="transaction_finish_title">Transaction Complete</string>
+    <string name="transaction_finish_message">The following transaction has been safely recorded, redirecting to the main menu</string>
 
+    <!-- TODO: Pending Transaction -->
+    <string name="signature_error_title">Error Signing Transaction!</string>
+    <string name="signature_error_message">There was an error signing the following transaction. Either the current transaction has been signed by the current account, or an invalid address is trying to sign a transaction that is not authorized</string>
+    <string name="signature_success_title">Success signing the transaction!</string>
+    <string name="signature_success_message">The following transaction has been signed by the current account</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -27,5 +38,6 @@
     <string name="amount_hint">Amount?</string>
     <string name="receipient_hint">Receipient</string>
     <string name="unit_hint">Unit</string>
+    <string name="content_placeholder">[Content]</string>
 
 </resources>

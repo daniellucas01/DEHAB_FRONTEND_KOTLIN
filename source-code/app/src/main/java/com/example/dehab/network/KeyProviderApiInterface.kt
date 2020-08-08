@@ -1,6 +1,7 @@
 package com.example.dehab.network
 
 import com.example.dehab.model.NewUserModel
+import com.example.dehab.model.TransactionSignModel
 import com.example.dehab.model.UserModel
 import kotlinx.coroutines.Deferred
 import retrofit2.Response
@@ -22,6 +23,10 @@ interface KeyProviderApiInterface {
 
     @POST("user")
     fun createNewUser(@Body newUser : NewUserModel) : Deferred<Response<Void>>
+
+    @POST("user/sign")
+    fun signTransaction(@Body transaction : TransactionSignModel) : Deferred<Response<Void>>
+
 
 
 }

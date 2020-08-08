@@ -16,6 +16,10 @@ import org.web3j.crypto.WalletUtils
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
 
+    override fun onSupportNavigateUp(): Boolean {
+        return findNavController(R.id.nav_host_fragment).navigateUp()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

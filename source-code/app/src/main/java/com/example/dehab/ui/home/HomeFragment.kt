@@ -70,47 +70,14 @@ class HomeFragment : Fragment() {
         binding.setupWalletButton.setOnClickListener() {
             deployContract()
         }
-        binding.depositEtherButton.setOnClickListener(){
-            transfer1Ether()
-        }
         binding.initWalletButton.setOnClickListener(){
             initWallet()
         }
     }
-
-    private fun transfer1Ether() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val oneEther = Convert.toWei("1", Convert.Unit.ETHER).toBigInteger();
-            val walletContract = MultiSignatureWallet.load(
-                "0xad14ced6364f30f6f575e184bf6841f89254c8be",
-                WalletSingleton.web3,
-                WalletSingleton.walletCredentials,
-                WalletSingleton.gasPrice,
-                WalletSingleton.gasLimit
-            ).deposit(oneEther).send()
-            withContext(Dispatchers.Main) {
-                homeViewModel.setWalletCredentials(WalletSingleton.walletCredentials)
-                homeViewModel.walletData.observe(requireActivity(), Observer {
-                    Log.e(Constants.AUTHOR_NAME, "Observing" )
-                    walletArrayList = ArrayList()
-                    walletArrayList.add(
-                        (WalletCardItems(
-                            Constants.PERSONAL_WALLET,
-                            it.ether_count.toDouble(),
-                            convertEtherToDollar(it.ether_count))
-                                )
-                    )
-                    binding.walletRecyclerView.adapter = WalletCardAdapter(walletArrayList, requireActivity())
-                })
-                Log.e(Constants.AUTHOR_NAME, "Deploy Success")
-            }
-        }
-    }
-
     private fun initWallet() {
         CoroutineScope(Dispatchers.IO).launch {
             val walletContract = MultiSignatureWallet.load(
-                "0xad14ced6364f30f6f575e184bf6841f89254c8be",
+                "0x3399289ce3c2197f5b16736ab238703e0ea80d9b",
                 WalletSingleton.web3,
                 WalletSingleton.walletCredentials,
                 WalletSingleton.gasPrice,

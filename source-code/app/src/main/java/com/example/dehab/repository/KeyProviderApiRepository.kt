@@ -1,6 +1,7 @@
 package com.example.dehab.repository
 
 import com.example.dehab.model.NewUserModel
+import com.example.dehab.model.TransactionSignModel
 import retrofit2.Response
 
 object KeyProviderApiRepository {
@@ -16,5 +17,9 @@ object KeyProviderApiRepository {
 
     suspend fun getUserWallet (user : NewUserModel) {
 
+    }
+
+    suspend fun signTransaction(transaction : TransactionSignModel): Response<Void> {
+        return apiInstance.signTransaction(transaction).await()
     }
 }

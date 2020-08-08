@@ -8,10 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.navigation.findNavController
 import com.example.dehab.Constants
 
 import com.example.dehab.R
 import com.example.dehab.databinding.FragmentTransferBinding
+import com.example.dehab.ui.transaction.TransactionFragmentDirections
+import kotlinx.android.synthetic.main.fragment_transfer.view.*
 
 class TransferFragment : Fragment() {
 
@@ -22,6 +25,7 @@ class TransferFragment : Fragment() {
     private lateinit var viewModel: TransferViewModel
     private lateinit var _binding: FragmentTransferBinding
     private val binding get() = _binding
+    private val inputType = "transfer"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,16 +48,19 @@ class TransferFragment : Fragment() {
 
         binding.transferUnitDropdown.setAdapter(adapter)
         binding.transferButton.setOnClickListener() {
-            transferCrypto()
+            transferCrypto(inputType,view)
         }
     }
 
-    private fun transferCrypto()  {
-        if (!transferValidation()) {
-            return
-        }
-
-        Log.e(Constants.AUTHOR_NAME, "Yay you can transfer")
+    private fun transferCrypto(transactionType : String,view : View)  {
+//        if (!transferValidation()) {
+//            return
+//        }
+        val amount = binding.transferAmountTextboxValue.text.toString()
+        val unit = binding.transferUnitDropdown.text.toString()
+        val address = binding.transferAddressValue.text.toString()
+        val action = TransactionFragmentDirections.transactionConfirmationDirection(transactionType, amount, unit, address)
+        view.findNavController().navigate(action)
     }
 
     private fun transferValidation() : Boolean {
@@ -61,9 +68,11 @@ class TransferFragment : Fragment() {
         //Content
         val transferAddress = binding.transferAddressValue.text.toString()
         val amount = binding.transferAmountTextboxValue.text
+        val unit = binding.transferUnitDropdown.text.toString()
         //Outline
         val transferOutline = binding.transferAddressOutline
         val amountOutline = binding.transferAmountTextboxOutline
+        val unitOutline = binding.transferUnitDropdownOutline
         // If transfer address is empty
         if(transferAddress.isEmpty()) {
             transferOutline.error = "Please fill in the address"
@@ -79,7 +88,7 @@ class TransferFragment : Fragment() {
                 transferOutline.error = null
             }
         }
-        // If password is empty
+        // If amount is empty
         if(amount.toString().isEmpty()) {
             amountOutline.error = "Please enter amount"
             validation = false
@@ -93,6 +102,15 @@ class TransferFragment : Fragment() {
             else {
                 amountOutline.error = null
             }
+        }
+
+        if (unit.isEmpty()){
+            unitOutline.error = "Unit?"
+            validation = false
+        }
+
+        else {
+            unitOutline.error = null
         }
 
         return validation
