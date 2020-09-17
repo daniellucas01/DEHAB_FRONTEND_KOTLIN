@@ -1,5 +1,6 @@
 package com.example.dehab.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,22 +9,30 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dehab.Constants
+import com.example.dehab.MainActivity
 import com.example.dehab.MainViewModel
+import com.example.dehab.R
 import com.example.dehab.databinding.FragmentHomeBinding
+import com.example.dehab.model.ErrorResponseModel
+import com.example.dehab.model.UserWalletByIdModel
+import com.example.dehab.repository.KeyProviderApiRepository
 import com.example.dehab.repository.WalletSingleton
 import com.example.dehab.sol_contract_wrapper.MultiSignatureWallet
 import com.example.dehab.ui.home.wallet_card.WalletCardAdapter
 import com.example.dehab.ui.home.wallet_card.WalletCardItems
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.kenai.jffi.Main
+import kotlinx.coroutines.*
 import org.web3j.crypto.CipherException
 import org.web3j.crypto.Credentials
 import org.web3j.utils.Convert
+import retrofit2.Response
 import java.io.IOException
 import java.math.BigDecimal
 
@@ -33,7 +42,10 @@ class HomeFragment : Fragment() {
     private lateinit var homeViewModel: MainViewModel
     private lateinit var walletArrayList: ArrayList<WalletCardItems>
     private lateinit var _binding : FragmentHomeBinding
+    private lateinit var contractAddress : String
+    private var userId: Int = 0
     private val binding get() = _binding
+    private var apiRepository = KeyProviderApiRepository
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var walletAddress: String
 
@@ -51,6 +63,11 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        homeViewModel.userId.observe(requireActivity(), Observer {
+            userId = it
+            setupContractAddress(userId)
+        })
         homeViewModel.walletData.observe(requireActivity(), Observer {
             Log.e(Constants.AUTHOR_NAME, "Observing" )
             walletArrayList = ArrayList()
@@ -66,18 +83,53 @@ class HomeFragment : Fragment() {
         gridLayoutManager = GridLayoutManager(requireContext(), 1, LinearLayoutManager.VERTICAL, false)
         binding.walletRecyclerView.layoutManager = gridLayoutManager
         binding.walletRecyclerView.setHasFixedSize(true)
-        binding.walletRecyclerView.adapter = WalletCardAdapter(walletArrayList, requireActivity())
+
         binding.setupWalletButton.setOnClickListener() {
-            deployContract()
-        }
-        binding.initWalletButton.setOnClickListener(){
-            initWallet()
+            val action = HomeFragmentDirections.deployContractDirection()
+            view.findNavController().navigate(action)
         }
     }
-    private fun initWallet() {
+
+    private fun setupContractAddress(userId: Int){
+        CoroutineScope(Dispatchers.IO).launch {
+            contractAddress = async {getContractAddress(userId)}.await()
+            if (validateAddress(contractAddress)) {
+                initWallet(contractAddress)
+            }
+            else {
+                initWalletWithNoContract()
+            }
+            Log.e(Constants.AUTHOR_NAME, contractAddress)
+            setContractInitButton(contractAddress)
+        }
+    }
+
+    private fun initWalletWithNoContract(){
+
+    }
+
+    private suspend fun validateAddress(contract : String) : Boolean {
+        if (contract == "1" || contract == "0") {
+            withContext(Dispatchers.Main) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(resources.getString(R.string.error_label))
+                    .setMessage("Online Wallet not detected or initialized please try again later once you have good network coverage or have deployed the contract")
+                    .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+
+                    }
+                    .show()
+            }
+            return false
+        }
+        return true
+    }
+
+    private fun initWallet(contractAddress : String) {
+
+
         CoroutineScope(Dispatchers.IO).launch {
             val walletContract = MultiSignatureWallet.load(
-                "0x3399289ce3c2197f5b16736ab238703e0ea80d9b",
+                contractAddress,
                 WalletSingleton.web3,
                 WalletSingleton.walletCredentials,
                 WalletSingleton.gasPrice,
@@ -94,9 +146,47 @@ class HomeFragment : Fragment() {
                             )
                 )
                 binding.walletRecyclerView.adapter = WalletCardAdapter(walletArrayList, requireActivity())
-                Log.e(Constants.AUTHOR_NAME, "Deploy Success")
             }
         }
+    }
+
+    private fun setContractInitButton(address : String) {
+        if (address == "1" || address == ""){
+            binding.setupWalletButton.text = "SETUP WALLET"
+        }
+        else {
+            binding.setupWalletButton.text = "REDEPLOY WALLET"
+        }
+    }
+
+
+    private suspend fun getContractAddress(userId : Int) : String {
+        val apiCall = apiRepository.getUserWalletById(
+            userId
+        )
+        if (apiCall.isSuccessful) {
+            Log.e(Constants.AUTHOR_NAME, "Wallet Address :" + apiCall.body()?.walletAddress.toString())
+            return apiCall.body()?.walletAddress.toString()
+        }
+        else {
+            withContext(Dispatchers.Main){
+                handlingResponseCodes(apiCall)
+            }
+            return 0.toString()
+        }
+    }
+
+    private fun handlingResponseCodes (response: Response<UserWalletByIdModel>) {
+        val gson = Gson()
+        val type = object : TypeToken<ErrorResponseModel>() {}.type
+        val errorResponse: ErrorResponseModel = gson.fromJson(response.errorBody()!!.charStream(), type)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(response.code().toString() + " " + resources.getString(R.string.error_label))
+            .setMessage(errorResponse.message)
+            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+
+            }
+            .show()
     }
 
     private fun deployContract() {

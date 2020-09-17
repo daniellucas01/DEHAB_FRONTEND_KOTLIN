@@ -9,12 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.dehab.Constants
 import com.example.dehab.MainActivity
 import com.example.dehab.R
 import com.example.dehab.databinding.LoadingWalletFragmentBinding
 import com.example.dehab.model.ErrorResponseModel
+import com.example.dehab.model.UserModel
 import com.example.dehab.repository.KeyProviderApiRepository
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
@@ -53,18 +55,20 @@ class LoadingWalletFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         walletDirectory = args.expectedWalletDirectory
-        binding.walletDirectoryLabel.text = walletDirectory
-        binding.decryptWalletButton.setOnClickListener() {
+        binding.newUserButton.setOnClickListener() {
+            val action = LoadingWalletFragmentDirections.CreateNewUserDirection()
+            view.findNavController().navigate(action)
+        }
+        binding.loginButton.setOnClickListener() {
             loadWallet(
                 binding.loginUsernameTextbox.text.toString(),
                 binding.loginPasswordTextbox.text.toString(),
-                binding.loginWalletPasswordTextbox.text.toString(),
                 walletDirectory
             )
         }
     }
 
-    private fun loadWallet (username : String, password: String ,walletPassword: String, walletDirectory: String) {
+    private fun loadWallet (username : String, password: String ,walletDirectory: String) {
 
         if (!formValidation()) {
             return
@@ -77,16 +81,16 @@ class LoadingWalletFragment : Fragment() {
                 password
             )
             // Then try to decrypt wallet
-            val walletAuth = decryptWallet(walletDirectory)
             withContext(Dispatchers.Main) {
                 if (!userAuth.isSuccessful) {
                     handlingResponseCodes(userAuth)
                 }
 
-                if (userAuth.isSuccessful && walletAuth) {
+                if (userAuth.isSuccessful) {
+                    val userId = userAuth.body()!!.userId
                     val intent = Intent(requireContext(), MainActivity::class.java)
                     intent.putExtra("wallet_directory",walletDirectory)
-                    intent.putExtra("password", walletPassword)
+                    intent.putExtra("userId", userId.toString())
                     startActivity(intent)
                 }
             }
@@ -94,7 +98,7 @@ class LoadingWalletFragment : Fragment() {
     }
 
 
-    private fun handlingResponseCodes (response: Response<Void>) {
+    private fun handlingResponseCodes (response: Response<UserModel>) {
         val gson = Gson()
         val type = object : TypeToken<ErrorResponseModel>() {}.type
         val errorResponse: ErrorResponseModel = gson.fromJson(response.errorBody()!!.charStream(), type)
@@ -108,33 +112,33 @@ class LoadingWalletFragment : Fragment() {
     }
 
     @SuppressLint("SetTextI18n")
-    private suspend fun decryptWallet(walletDirectory : String) : Boolean {
-        //ToDo : Wallet Password Validation
-        //ToDo : Load Wallet
-        //ToDo : Make it asynchronous
-        try {
-            val password = binding.loginWalletPasswordTextbox.text.toString()
-            val credentials : Credentials = WalletUtils.loadCredentials(password, walletDirectory)
-            withContext(Dispatchers.Main) {
-                binding.privateAddressLabel.text = credentials.ecKeyPair.privateKey.toString(16)
-            }
-            return true
-        }
-        catch (error: CipherException) {
-            withContext(Dispatchers.Main) {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(resources.getString(R.string.invalid_wallet_password_title))
-                    .setMessage(resources.getString(R.string.invalid_wallet_password))
-                    .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
-
-                    }
-                    .show()
-            }
-            return false
-        }
-
-
-    }
+//    private suspend fun decryptWallet(walletDirectory : String) : Boolean {
+//        //ToDo : Wallet Password Validation
+//        //ToDo : Load Wallet
+//        //ToDo : Make it asynchronous
+//        try {
+//            val password = binding.loginWalletPasswordTextbox.text.toString()
+//            val credentials : Credentials = WalletUtils.loadCredentials(password, walletDirectory)
+//            withContext(Dispatchers.Main) {
+//                binding.privateAddressLabel.text = credentials.ecKeyPair.privateKey.toString(16)
+//            }
+//            return true
+//        }
+//        catch (error: CipherException) {
+//            withContext(Dispatchers.Main) {
+//                MaterialAlertDialogBuilder(requireContext())
+//                    .setTitle(resources.getString(R.string.invalid_wallet_password_title))
+//                    .setMessage(resources.getString(R.string.invalid_wallet_password))
+//                    .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+//
+//                    }
+//                    .show()
+//            }
+//            return false
+//        }
+//
+//
+//    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -147,11 +151,9 @@ class LoadingWalletFragment : Fragment() {
         //Content
         val username = binding.loginUsernameTextbox.text.toString()
         val password = binding.loginPasswordTextbox.text.toString()
-        val walletPassword = binding.loginWalletPasswordTextbox.text.toString()
         //Outline
         val usernameOutline = binding.loginUsernameTextboxOutline
         val passwordOutline = binding.loginPasswordTextboxOutline
-        val walletPasswordOutline = binding.loginWalletPasswordTextboxOutline
         // If username is empty
         if(username.isEmpty()) {
             usernameOutline.error = "Please fill in your username"
@@ -170,13 +172,6 @@ class LoadingWalletFragment : Fragment() {
             passwordOutline.error = null
         }
         // If wallet is empty
-        if(walletPassword.isEmpty()) {
-            walletPasswordOutline.error = "Please fill in your wallet password"
-            validation = false
-        }
-        else {
-            walletPasswordOutline.error = null
-        }
         return validation
     }
 

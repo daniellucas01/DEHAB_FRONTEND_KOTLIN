@@ -1,10 +1,12 @@
 <resources>
     <string name="app_name">DEHAB</string>
     <string name="title_home">Home</string>
-    <string name="title_history">History</string>
+    <string name="title_pending">Pending</string>
+    <string name="title_pending_transaction">Pending Transaction</string>
     <string name="title_transaction">Transaction</string>
     <string name="error_label">Error!</string>
     <string name="ok_label">OK</string>
+    <string name="cancel_label">CANCEL</string>
     <string name="existing_wallet_message">Sorry, there is already an existing wallet located in your phone.</string>
     <string name="wallet_exists_title">Wallet Exists</string>
     <string name="invalid_directory">Sorry, the following directory does not exist</string>
@@ -15,17 +17,42 @@
     <string name="ether_count_placeholder">%s Ether</string>
     <string name="money_count_placeholder">USD($) %s</string>
 
+    <!-- TODO: Deploy Smart Contract -->
+    <string name="deploy_contract_authentication_title">Are you sure?</string>
+    <string name="deploy_contract_authentication_message">If you already have an instance of online wallet, that online wallet will be overwritten by the system. Please also make sure that you have at least 10 GWEI in your offline wallet before proceeding</string>
+    <string name="deploy_contract_success_title">Create Wallet Success!</string>
+    <string name="deploy_contract_success_message">Your Online Wallet has been deployed to the blokchain network! You may now use the full features of this application</string>
+    <string name="deploy_contract_failure_title">Failed to create Wallet!</string>
+    <string name="deploy_contract_failure_message">There was an error when trying to deploy your online wallet! Please make sure that you have good internet connection and try again at a later time!</string>
+
+
     <!-- TODO: Transaction -->
+    <string name="transfer_error_title">Transfer failed!</string>
+    <string name="transfer_error_message">Make sure that you have enough balance in the wallet to register a transfer</string>
+    <string name="deposit_error_title">Deposit failed!</string>
+    <string name="deposit_error_message">Make sure that you have enough balance in your offline wallet to deposit funds to the online contract</string>
     <string name="confirmation_transaction_error_title">Sorry!</string>
     <string name="confirmation_transaction_error_message">Error creating transction, reverting back to main layout</string>
     <string name="transaction_finish_title">Transaction Complete</string>
     <string name="transaction_finish_message">The following transaction has been safely recorded, redirecting to the main menu</string>
+    <string name="delete_transaction_confirmation_title">Confirmation</string>
+    <string name="delete_transaction_confirmation_message">Are you sure you want to delete the following transaction from the queue?</string>
+    <string name="delete_transaction_finish_title">Delete Transaction Success!</string>
+    <string name="delete_transaction_finish_message">The following transaction has been deleted from the queue. Redirecting to transaction history layout</string>
+    <string name="delete_transaction_error_title">Delete Transaction Error!</string>
+    <string name="delete_transaction_error_message">Failed to delete transaction, please try again later</string>
 
     <!-- TODO: Pending Transaction -->
     <string name="signature_error_title">Error Signing Transaction!</string>
     <string name="signature_error_message">There was an error signing the following transaction. Either the current transaction has been signed by the current account, or an invalid address is trying to sign a transaction that is not authorized</string>
     <string name="signature_success_title">Success signing the transaction!</string>
     <string name="signature_success_message">The following transaction has been signed by the current account</string>
+    <string name="request_signature_success_title">Success requesting signature for the transaction!</string>
+    <string name="request_signature_success_message">The following transaction has been signed by the Key Provider</string>
+    <string name="loading_transaction_error_title">Error Loading Transaction!</string>
+    <string name="loading_transaction_error_message">The following transaction details cannot be loaded, please make sure you have good internet connection!</string>
+
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -34,10 +61,17 @@
     <string name="wallet_password_label">Wallet Password</string>
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
-    <string name="decrypt_wallet_label">Decrypt Wallet</string>
+    <string name="decrypt_wallet_label">Login</string>
     <string name="amount_hint">Amount?</string>
     <string name="receipient_hint">Receipient</string>
     <string name="unit_hint">Unit</string>
     <string name="content_placeholder">[Content]</string>
 
+    <string name="log_dialog_title">Are you sure?</string>
+    <string name="log_dialog_message">Do you wish to proceed login out of your session?</string>
+
+    <!-- TODO: Default Project Folder Name-->
+    <string name="tos_agreement_title">AGREEMENT TO TERMS</string>
+    <string name="tos_last_updated">Last updated 10/8/2020</string>
+    <string name="tos_agreement_content">These Terms of Service constitute a legally binding agreement made between you, whether personally or on behalf of an entity (“you”) and DEHAB.Inc (“we,” “us” or “our”), concerning your access to and use of the DEHAB mobile application as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto.  \n\nYou agree that by clicking the button, you have read, understood, and agree to be bound by all of these Terms of Service. If you do not agree with all of these Terms of Service, then you are expressly prohibited from using the application and you must discontinue use immediately.\n\nOnce agreement of the tos has been read and accepted through the action of clicking the button below, an instance of smart contract that will be used as your online wallet will be sent to the blockchain and will be used throughout the application.\n\nThe information provided on this mobile application is not intended for distribution to or use by any person or entity in any jurisdiction or country where such distribution or use would be contrary to law or regulation or which would subject us to any registration requirement within such jurisdiction or country.\n\nAccordingly, those persons who choose to access the mobile application from other locations do so on their own initiative and are solely responsible for compliance with local laws, if and to the extent local laws are applicable.\n\nThese Terms of Service were generated by DEHAB.Inc Law Team.\n</string>
 </resources>

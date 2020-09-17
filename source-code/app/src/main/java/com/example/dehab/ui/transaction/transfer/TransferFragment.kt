@@ -8,22 +8,36 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.example.dehab.Constants
+import com.example.dehab.MainViewModel
 
 import com.example.dehab.R
 import com.example.dehab.databinding.FragmentTransferBinding
+import com.example.dehab.model.ErrorResponseModel
+import com.example.dehab.model.UserWalletByIdModel
+import com.example.dehab.repository.KeyProviderApiRepository
+import com.example.dehab.repository.WalletSingleton
+import com.example.dehab.sol_contract_wrapper.MultiSignatureWallet
+import com.example.dehab.ui.home.wallet_card.WalletCardAdapter
+import com.example.dehab.ui.home.wallet_card.WalletCardItems
 import com.example.dehab.ui.transaction.TransactionFragmentDirections
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
+import kotlinx.coroutines.*
+import org.web3j.utils.Convert
+import retrofit2.Response
 
 class TransferFragment : Fragment() {
 
-    companion object {
-        fun newInstance() =
-            TransferFragment()
-    }
-    private lateinit var viewModel: TransferViewModel
+    private lateinit var mainViewModel : MainViewModel
     private lateinit var _binding: FragmentTransferBinding
+    private lateinit var contractAddress : String
+    private var apiRepository = KeyProviderApiRepository
     private val binding get() = _binding
     private val inputType = "transfer"
 
@@ -31,36 +45,89 @@ class TransferFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        mainViewModel = ViewModelProvider(requireActivity()).get(com.example.dehab.MainViewModel::class.java)
         _binding = FragmentTransferBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(TransferViewModel::class.java)
-        // TODO: Use the ViewModel
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val transferUnit = arrayOf<String>("Ether","Gwei", "Wei")
         val adapter = ArrayAdapter<Any>(requireContext(), R.layout.drop_down_menu_item, transferUnit)
-
+        mainViewModel.userId.observe(requireActivity(), Observer {
+            setupContractAddress(it)
+        })
         binding.transferUnitDropdown.setAdapter(adapter)
         binding.transferButton.setOnClickListener() {
-            transferCrypto(inputType,view)
+            transferCrypto(inputType,view,contractAddress)
         }
     }
 
-    private fun transferCrypto(transactionType : String,view : View)  {
-//        if (!transferValidation()) {
-//            return
-//        }
+    private fun setupContractAddress(userId: Int){
+        CoroutineScope(Dispatchers.IO).launch {
+            contractAddress = async {getContractAddress(userId)}.await()
+        }
+    }
+
+    private fun validateAddress(contract : String) : Boolean {
+        if (contract == "1" || contract == "0") {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(resources.getString(R.string.error_label))
+                .setMessage("Online Wallet not detected or initialized please try again later once you have good network coverage or have deployed the contract")
+                .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+
+                }
+                .show()
+            return false
+        }
+        return true
+    }
+
+    private fun transferCrypto(transactionType : String,view : View , contract : String )  {
+
+        if (!transferValidation()) {
+            return
+        }
+
+        if (!validateAddress(contract)) {
+            return
+        }
+
         val amount = binding.transferAmountTextboxValue.text.toString()
         val unit = binding.transferUnitDropdown.text.toString()
         val address = binding.transferAddressValue.text.toString()
-        val action = TransactionFragmentDirections.transactionConfirmationDirection(transactionType, amount, unit, address)
+        //validate contract address
+        val action = TransactionFragmentDirections.transactionConfirmationDirection(transactionType, amount, unit, address, contract)
         view.findNavController().navigate(action)
+    }
+
+    private suspend fun getContractAddress(userId : Int) : String {
+        val apiCall = apiRepository.getUserWalletById(
+            userId
+        )
+        if (apiCall.isSuccessful) {
+            Log.e(Constants.AUTHOR_NAME, "Wallet Address :" + apiCall.body()?.walletAddress.toString())
+            return apiCall.body()?.walletAddress.toString()
+        }
+        else {
+            withContext(Dispatchers.Main){
+                handlingResponseCodes(apiCall)
+            }
+            return 0.toString()
+        }
+    }
+
+    private fun handlingResponseCodes (response: Response<UserWalletByIdModel>) {
+        val gson = Gson()
+        val type = object : TypeToken<ErrorResponseModel>() {}.type
+        val errorResponse: ErrorResponseModel = gson.fromJson(response.errorBody()!!.charStream(), type)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(response.code().toString() + " " + resources.getString(R.string.error_label))
+            .setMessage(errorResponse.message)
+            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+
+            }
+            .show()
     }
 
     private fun transferValidation() : Boolean {

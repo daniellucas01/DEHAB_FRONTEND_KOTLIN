@@ -37,10 +37,6 @@ class WalletCreationFragment : Fragment() {
     private var apiRepository = KeyProviderApiRepository
     private lateinit var finalWalletDirectory : File
 
-    companion object {
-        fun newInstance() = WalletCreationFragment()
-    }
-
     private lateinit var viewModel: WalletCreationViewModel
 
     override fun onCreateView(
@@ -55,50 +51,23 @@ class WalletCreationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.createWalletButton.setOnClickListener() {
             permissionsBuilder(Manifest.permission.WRITE_EXTERNAL_STORAGE).build().send { result ->
-                if (result.allGranted()) {
-                    val walletDirectory = File(Environment.getExternalStorageDirectory(), "/${Constants.folderName}")
-                    createFolder(walletDirectory)
-                    userSignUp(
-                        binding.usernameTextbox.text.toString(),
-                        binding.passwordTextBox.text.toString(),
-                        binding.walletPasswordTextbox.text.toString(),
-                        walletDirectory,
-                        view
-                    )
-//                    try {
-//                        val ethereumWallet = generateWallet(walletDirectory, walletPassword, view)
-//                        walletDirectory = File(walletDirectory, "/$ethereumWallet")
-//                        val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(walletDirectory.toString())
-//                        view.findNavController().navigate(action)
-//                    }
-//                    catch (error : Exception) {
-//                        MaterialAlertDialogBuilder(requireContext())
-//                            .setTitle(resources.getString(R.string.error_label))
-//                            .setMessage(error.toString())
-//                            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
-//
-//                            }
-//                            .show()
-//                    }
-                }
+                userSignUp(
+                    binding.usernameTextbox.text.toString(),
+                    binding.passwordTextBox.text.toString(),
+                    view
+                )
             }
         }
     }
 
-    private fun userSignUp (username: String, password: String, walletPassword : String, walletDirectory: File, view: View) {
+    private fun userSignUp (username: String, password: String, view: View) {
 
         if (!formValidation()) {
             return
         }
-
-        if (!tryGeneratingWallet(walletDirectory, walletPassword,view)){
-            return
-        }
-
         else {
             CoroutineScope(IO).launch {
                 val register = apiRepository.registerUser(
-
                     NewUserModel(
                         username,
                         password,
@@ -107,8 +76,7 @@ class WalletCreationFragment : Fragment() {
                 )
                 withContext(Main) {
                     if (register.isSuccessful) {
-                        val action = WalletCreationFragmentDirections.fromCreationToLoadingDirection(finalWalletDirectory.toString())
-                        view.findNavController().navigate(action)
+                        view.findNavController().navigateUp()
                     }
                     else {
                         handlingResponseCodes(register)
@@ -159,11 +127,11 @@ class WalletCreationFragment : Fragment() {
         //Content
         val username = binding.usernameTextbox.text.toString()
         val password = binding.passwordTextBox.text.toString()
-        val walletPassword = binding.walletPasswordTextbox.text.toString()
+        //val walletPassword = binding.walletPasswordTextbox.text.toString()
         //Outline
         val usernameOutline = binding.usernameTextboxOutline
         val passwordOutline = binding.passwordTextBoxOutline
-        val walletPasswordOutline = binding.walletPasswordTextboxOutline
+        //val walletPasswordOutline = binding.walletPasswordTextboxOutline
         // If username is empty
         if(username.isEmpty()) {
             usernameOutline.error = "Please fill in your username"
@@ -182,13 +150,13 @@ class WalletCreationFragment : Fragment() {
             passwordOutline.error = null
         }
         // If wallet is empty
-        if(walletPassword.isEmpty()) {
-            walletPasswordOutline.error = "Please fill in your wallet password"
-            validation = false
-        }
-        else {
-            walletPasswordOutline.error = null
-        }
+//        if(walletPassword.isEmpty()) {
+//            walletPasswordOutline.error = "Please fill in your wallet password"
+//            validation = false
+//        }
+//        else {
+//            walletPasswordOutline.error = null
+//        }
 
 
 

@@ -3,6 +3,7 @@ package com.example.dehab.ui.wallet
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.dehab.R
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Provider
@@ -12,12 +13,15 @@ import java.security.Security
 class WalletActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
-        return findNavController(R.id.nav_host_fragment).navigateUp()
+        return findNavController(R.id.starting_nav_host_fragment).navigateUp()
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
+        val navController = findNavController(R.id.starting_nav_host_fragment)
+        setupActionBarWithNavController(navController)
         setupBouncyCastle()
     }
 

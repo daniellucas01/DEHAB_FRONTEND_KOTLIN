@@ -3,48 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/creating_wallet_travel"
-    app:startDestination="@id/startingFragment">
+    app:startDestination="@id/loadingWalletFragment">
     <fragment
-        android:id="@+id/startingFragment"
-        android:name="com.example.dehab.ui.wallet.StartingFragment"
-        android:label="fragment_starting"
-        tools:layout="@layout/fragment_starting">
+        android:id="@+id/walletCreationFragment"
+        android:name="com.example.dehab.ui.wallet.WalletCreationFragment"
+        android:label="Sign Up"
+        tools:layout="@layout/fragment_wallet_creation"/>
+    <fragment
+        android:id="@+id/loadingWalletFragment"
+        android:name="com.example.dehab.ui.wallet.loading_wallet.LoadingWalletFragment"
+        android:label="Login"
+        tools:layout="@layout/loading_wallet_fragment">
+        <argument
+            android:name="expected_wallet_directory"
+            android:defaultValue="null"
+            app:argType="string" />
         <action
-            android:id="@+id/wallet_creation_direction"
+            android:id="@+id/CreateNewUserDirection"
             app:destination="@id/walletCreationFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-        <action
-            android:id="@+id/loading_wallet_direction"
-            app:destination="@id/loadingWalletFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
-    </fragment>
-    <fragment
-        android:id="@+id/walletCreationFragment"
-        android:name="com.example.dehab.ui.wallet.WalletCreationFragment"
-        android:label="fragment_wallet_creation"
-        tools:layout="@layout/fragment_wallet_creation" >
-        <action
-            android:id="@+id/from_creation_to_loading_direction"
-            app:destination="@id/loadingWalletFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"/>
-    </fragment>
-    <fragment
-        android:id="@+id/loadingWalletFragment"
-        android:name="com.example.dehab.ui.wallet.loading_wallet.LoadingWalletFragment"
-        android:label="loading_wallet_fragment"
-        tools:layout="@layout/loading_wallet_fragment" >
-        <argument
-            android:name="expected_wallet_directory"
-            app:argType="string"
-            android:defaultValue="null" />
     </fragment>
 </navigation>

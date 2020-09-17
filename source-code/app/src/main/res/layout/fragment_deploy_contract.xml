@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.wallet.online_wallet_deploy.DeployContractFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <Button
+        android:id="@+id/deploy_contract_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="Deploy Online Wallet"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ScrollView
+        android:id="@+id/tos_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/deploy_contract_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/tos_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Terms of Service"
+                android:textStyle="bold"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:textSize="40sp"
+                android:singleLine="true"
+                android:textColor="@color/colorBlack">
+            </TextView>
+
+            <TextView
+                android:id="@+id/last_update_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/tos_last_updated"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="18sp"
+                android:singleLine="true"
+                android:textColor="@color/colorBlack">
+            </TextView>
+            <TextView
+                android:id="@+id/tos_agreement_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/tos_agreement_title"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:singleLine="true"
+                android:textColor="@color/colorBlack">
+            </TextView>
+
+            <TextView
+                android:id="@+id/agreement_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/tos_agreement_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:justificationMode="inter_word"
+                android:textSize="18sp"
+                android:textColor="@color/colorBlack">
+            </TextView>
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

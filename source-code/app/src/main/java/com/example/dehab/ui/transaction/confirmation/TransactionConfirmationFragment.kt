@@ -7,9 +7,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.dehab.Constants
+import com.example.dehab.MainViewModel
 
 import com.example.dehab.R
 import com.example.dehab.databinding.FragmentTransactionConfirmationBinding
@@ -22,13 +25,16 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.web3j.utils.Convert
+import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.contracts.contract
 
 class TransactionConfirmationFragment : Fragment() {
 
-    private lateinit var viewModel: TransactionConfirmationViewModel
+    private lateinit var mainViewModel: MainViewModel
     private lateinit var _binding: FragmentTransactionConfirmationBinding
+    private lateinit var contractAddress : String
     private val binding get() = _binding
     private val args: TransactionConfirmationFragmentArgs by navArgs()
 
@@ -37,12 +43,14 @@ class TransactionConfirmationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        mainViewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
         _binding = FragmentTransactionConfirmationBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val contractAddress = args.contract
         val inputType = args.transactionType
         val amount = args.amount
         val unit = args.unit
@@ -56,16 +64,9 @@ class TransactionConfirmationFragment : Fragment() {
         val address = args.address
         setViewContent(inputType, amount, unit, address, weiAmount.toString())
         binding.confirmPaymentButton.setOnClickListener() {
-            performTransaction(inputType, view, address, weiAmount)
+            performTransaction(inputType, view, address, weiAmount, contractAddress)
         }
     }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(TransactionConfirmationViewModel::class.java)
-        // TODO: Use the ViewModel
-    }
-
     private fun setViewContent(type : String, amount: String, unit : String, address : String, weiAmount: String) {
         val transactionType = binding.transactionTypeValue
         val sender = binding.senderValue
@@ -108,42 +109,70 @@ class TransactionConfirmationFragment : Fragment() {
         return mWeiAmount
     }
 
-    private fun performTransaction(type : String, view: View, address: String, weiAmount: BigInteger) {
+    private fun performTransaction(type : String, view: View, address: String, weiAmount: BigInteger, contractAddress : String) {
+        //validate address
+
         when(type){
-            "deposit"   -> initateDeposit(view, weiAmount)
-            "transfer"  -> initiateTransfer(view, address, weiAmount)
+            "deposit"   -> initateDeposit(view, weiAmount, contractAddress)
+            "transfer"  -> initiateTransfer(view, address, weiAmount, contractAddress)
             else        -> transactionError(view)
         }
     }
 
-    private fun initateDeposit(view: View, weiAmount: BigInteger) {
+    private fun initateDeposit(view: View, weiAmount: BigInteger, contractAddress: String) {
         Log.e(Constants.AUTHOR_NAME, "Initiating deposit")
+        Log.e(Constants.AUTHOR_NAME, contractAddress)
         CoroutineScope(IO).launch {
-            MultiSignatureWallet.load(
-                "0x3399289ce3c2197f5b16736ab238703e0ea80d9b",
-                WalletSingleton.web3,
-                WalletSingleton.walletCredentials,
-                WalletSingleton.gasPrice,
-                WalletSingleton.gasLimit
-            ).deposit(weiAmount).send()
-            withContext(Dispatchers.Main) {
-                finishTransaction(view)
+            try {
+                MultiSignatureWallet.load(
+                    contractAddress,
+                    WalletSingleton.web3,
+                    WalletSingleton.walletCredentials,
+                    WalletSingleton.gasPrice,
+                    WalletSingleton.gasLimit
+                ).deposit(weiAmount).send()
+                withContext(Dispatchers.Main) {
+                    finishTransaction(view)
+                }
+            }
+            catch (e : RuntimeException) {
+                withContext(Dispatchers.Main){
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(resources.getString(R.string.deposit_error_title))
+                        .setMessage(resources.getString(R.string.deposit_error_message))
+                        .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                        }
+                        .show()
+                }
             }
         }
+
     }
 
-    private fun initiateTransfer(view: View, address: String, weiAmount: BigInteger) {
+    private fun initiateTransfer(view: View, address: String, weiAmount: BigInteger, contractAddress: String) {
         Log.e(Constants.AUTHOR_NAME, "Initiating transfer")
         CoroutineScope(IO).launch {
-            MultiSignatureWallet.load(
-                "0x3399289ce3c2197f5b16736ab238703e0ea80d9b",
-                WalletSingleton.web3,
-                WalletSingleton.walletCredentials,
-                WalletSingleton.gasPrice,
-                WalletSingleton.gasLimit
-            ).transferTo(weiAmount, address).send()
-            withContext(Dispatchers.Main) {
-                finishTransaction(view)
+            try {
+                MultiSignatureWallet.load(
+                    contractAddress,
+                    WalletSingleton.web3,
+                    WalletSingleton.walletCredentials,
+                    WalletSingleton.gasPrice,
+                    WalletSingleton.gasLimit
+                ).transferTo(weiAmount, address).send()
+                withContext(Dispatchers.Main) {
+                    finishTransaction(view)
+                }
+            }
+            catch (e : RuntimeException) {
+                withContext(Dispatchers.Main){
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(resources.getString(R.string.transfer_error_title))
+                        .setMessage(resources.getString(R.string.transfer_error_message))
+                        .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                        }
+                        .show()
+                }
             }
         }
     }

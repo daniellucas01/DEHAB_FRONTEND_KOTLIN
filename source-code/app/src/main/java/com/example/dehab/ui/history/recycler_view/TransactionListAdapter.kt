@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.custom_transaction_card.view.*
 import kotlinx.android.synthetic.main.fragment_deposit.view.*
 import org.w3c.dom.Text
 
-class TransactionListAdapter (private var arrayList: ArrayList<TransactionItem>, private var mactivity: FragmentActivity) :
+class TransactionListAdapter (private var arrayList: ArrayList<TransactionItem>, private var contract: String) :
     RecyclerView.Adapter<TransactionListAdapter.CardItemHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardItemHolder {
@@ -35,7 +35,7 @@ class TransactionListAdapter (private var arrayList: ArrayList<TransactionItem>,
             val transactionDetailButton : TransactionItem = arrayList[position]
             val transactionNumber = transactionDetailButton.transactionNumber
             if (transactionNumber != null) {
-                val action = HistoryFragmentDirections.viewTransactionDetail(transactionNumber)
+                val action = HistoryFragmentDirections.viewTransactionDetail(transactionNumber, contract)
                 view.findNavController().navigate(action)
             }
         }

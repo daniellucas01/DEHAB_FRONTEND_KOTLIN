@@ -2,14 +2,19 @@ package com.example.dehab
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dehab.repository.WalletSingleton
+import com.example.dehab.ui.wallet.WalletActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
 
@@ -37,9 +42,33 @@ class MainActivity : AppCompatActivity() {
         viewModel = model
         val intent : Intent = intent
         val walletPassword = intent.getStringExtra("password")
-        val walletDirectory = intent.getStringExtra("wallet_directory")
-        val credentials1 = Credentials.create("f15fb2252bd1836dd7cad56089bf3f83228c4c881b031f855af47acb611a6adc")
-        val credentials = WalletUtils.loadCredentials(walletPassword, walletDirectory)
+        val userId = intent.getStringExtra("userId")
+        viewModel.setUserId(userId.toInt())
         viewModel.setWalletCredentials(WalletSingleton.walletCredentials)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.log_out_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        when (id) {
+            R.id.log_out_button -> {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(resources.getString(R.string.log_dialog_title))
+                    .setMessage(resources.getString(R.string.log_dialog_message))
+                    .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                        val intent = Intent(this, WalletActivity::class.java)
+                        startActivity(intent)
+                    }
+                    .setNegativeButton(resources.getString(R.string.cancel_label)){ dialog, which ->
+
+                    }
+                    .show()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

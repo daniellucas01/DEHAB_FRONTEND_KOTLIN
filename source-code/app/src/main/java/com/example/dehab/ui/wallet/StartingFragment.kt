@@ -46,8 +46,8 @@ class StartingFragment : Fragment() {
 
             //ToDo : If not exist go to create page
 
-            val action = StartingFragmentDirections.walletCreationDirection()
-            view.findNavController().navigate(action)
+//            val action = StartingFragmentDirections.walletCreationDirection()
+//            view.findNavController().navigate(action)
 
             //Process
         }
@@ -87,8 +87,8 @@ class StartingFragment : Fragment() {
             mWalletDirectory = File(walletDirectory, "/$name")
             // ToDO : Pass the wallet directory
             val expectedDirectory = mWalletDirectory.toString()
-            val action = StartingFragmentDirections.loadingWalletDirection(expectedDirectory)
-            view.findNavController().navigate(action)
+//            val action = StartingFragmentDirections.loadingWalletDirection(expectedDirectory)
+//            view.findNavController().navigate(action)
         }
         else {
             //File is empty or no wallet file
@@ -96,8 +96,8 @@ class StartingFragment : Fragment() {
                 .setTitle(resources.getString(R.string.error_label))
                 .setMessage(resources.getString(R.string.no_wallet_file_label))
                 .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
-                    val action = StartingFragmentDirections.walletCreationDirection()
-                    view.findNavController().navigate(action)
+//                    val action = StartingFragmentDirections.walletCreationDirection()
+//                    view.findNavController().navigate(action)
                 }
                 .show()
         }

@@ -11,10 +11,7 @@ import org.web3j.utils.Convert
 import java.math.BigInteger
 
 object WalletSingleton {
-    //private const val BASE_URL = "https://rinkeby.infura.io/v3/1c87174ef80345fb92acbd2da20133e5"
-    //private const val BASE_URL = "https://rinkeby.infura.io/v3/1c87174ef80345fb92acbd2da20133e5"
     private const val BASE_URL = "HTTP://192.168.0.109:7545"
-
 
     val web3 : Web3j by lazy {
         Web3j.build(HttpService(BASE_URL))

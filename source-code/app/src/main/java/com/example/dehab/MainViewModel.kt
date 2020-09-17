@@ -11,11 +11,16 @@ import java.math.BigInteger
 
 class MainViewModel() : ViewModel() {
     private val _walletCredentials : MutableLiveData <Credentials> = MutableLiveData()
+    private val _userId : MutableLiveData<Int> = MutableLiveData()
 
 
     val walletData : LiveData<WalletDataModel> = Transformations.switchMap(_walletCredentials) {walletCredentials ->
         WalletRepository.getWalletEther(walletCredentials)
     }
+
+    val userId : LiveData<Int> = _userId
+
+
 
     val privateKey : LiveData<BigInteger> = Transformations.switchMap(_walletCredentials) {walletCredentials ->
         WalletRepository.getPrivateKey(walletCredentials)
@@ -26,6 +31,13 @@ class MainViewModel() : ViewModel() {
             return
         }
         _walletCredentials.value = credentials
+    }
+
+    fun setUserId ( userId : Int) {
+        if (_userId.value == userId) {
+            return
+        }
+        _userId.value = userId
     }
 
     fun getWalletCredentials () : Credentials? {

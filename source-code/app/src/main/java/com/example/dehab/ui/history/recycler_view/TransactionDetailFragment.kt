@@ -13,12 +13,10 @@ import com.example.dehab.Constants
 import com.example.dehab.R
 import com.example.dehab.databinding.FragmentTransactionDetailBinding
 import com.example.dehab.model.ErrorResponseModel
-import com.example.dehab.model.NewUserModel
 import com.example.dehab.model.TransactionSignModel
 import com.example.dehab.repository.KeyProviderApiRepository
 import com.example.dehab.repository.WalletSingleton
 import com.example.dehab.sol_contract_wrapper.MultiSignatureWallet
-import com.example.dehab.ui.wallet.WalletCreationFragmentDirections
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -57,24 +55,39 @@ class TransactionDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val transactionNumber = args.transactionNumber
+        val contractAddress = args.contract
+
         CoroutineScope(Dispatchers.IO).launch {
-            val walletContract = MultiSignatureWallet.load(
-                "0x3399289ce3c2197f5b16736ab238703e0ea80d9b",
-                WalletSingleton.web3,
-                WalletSingleton.walletCredentials,
-                WalletSingleton.gasPrice,
-                WalletSingleton.gasLimit
-            )
-            val transaction = walletContract.getPendingTransactionInformation(transactionNumber.toBigInteger()).send()
-            withContext(Dispatchers.Main) {
-                if (transaction != null) {
-                    Log.e(Constants.AUTHOR_NAME, transaction.toString())
-                    binding.transactionSenderValue.text = transaction.value1.toString()
-                    binding.transactionRecipientValue.text = transaction.value2.toString()
-                    binding.transactionAmountValue.text = convertWeiToEther(transaction.value3)
-                    binding.transactionSignatureValue.text = transaction.value4.toString()
+            try{
+                val walletContract = MultiSignatureWallet.load(
+                    contractAddress,
+                    WalletSingleton.web3,
+                    WalletSingleton.walletCredentials,
+                    WalletSingleton.gasPrice,
+                    WalletSingleton.gasLimit
+                )
+                val transaction = walletContract.getPendingTransactionInformation(transactionNumber.toBigInteger()).send()
+                withContext(Dispatchers.Main) {
+                    if (transaction != null) {
+                        Log.e(Constants.AUTHOR_NAME, transaction.toString())
+                        binding.transactionSenderValue.text = transaction.value1.toString()
+                        binding.transactionRecipientValue.text = transaction.value2.toString()
+                        binding.transactionAmountValue.text = convertWeiToEther(transaction.value3)
+                        binding.transactionSignatureValue.text = transaction.value4.toString()
+                    }
                 }
             }
+            catch (e : RuntimeException) {
+                withContext(Dispatchers.Main) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(resources.getString(R.string.loading_transaction_error_title))
+                        .setMessage(resources.getString(R.string.loading_transaction_error_message))
+                        .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                        }
+                        .show()
+                }
+            }
+
         }
 
         //Buttons
@@ -82,7 +95,7 @@ class TransactionDetailFragment : Fragment() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val walletContract = MultiSignatureWallet.load(
-                        "0x3399289ce3c2197f5b16736ab238703e0ea80d9b",
+                        contractAddress,
                         WalletSingleton.web3,
                         WalletSingleton.walletCredentials,
                         WalletSingleton.gasPrice,
@@ -111,8 +124,61 @@ class TransactionDetailFragment : Fragment() {
             }
         }
 
+        binding.deleteTransactionButton.setOnClickListener(){
+            deleteTransactionConfirmation(contractAddress, transactionNumber, view)
+        }
+
         binding.requestSignatureButton.setOnClickListener(){
-            requestSignatureFromAPI("0x3399289ce3c2197f5b16736ab238703e0ea80d9b", transactionNumber, view)
+            requestSignatureFromAPI(contractAddress, transactionNumber, view)
+        }
+    }
+
+    private fun deleteTransactionConfirmation(address : String, number : Int, view : View) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(resources.getString(R.string.delete_transaction_confirmation_title))
+            .setMessage(resources.getString(R.string.delete_transaction_confirmation_message))
+            .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                attemptingToDeleteTransaction(address, number, view)
+            }
+            .setNegativeButton(resources.getString(R.string.cancel_label)) { dialog, which ->
+                //Do nothing
+            }
+            .show()
+    }
+
+    private fun attemptingToDeleteTransaction(address : String, number : Int, view : View) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val walletContract = MultiSignatureWallet.load(
+                    address,
+                    WalletSingleton.web3,
+                    WalletSingleton.walletCredentials,
+                    WalletSingleton.gasPrice,
+                    WalletSingleton.gasLimit
+                )
+                val transaction = walletContract.deleteTransaction(number.toBigInteger()).send()
+                withContext(Main){
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(resources.getString(R.string.delete_transaction_finish_title))
+                        .setMessage(resources.getString(R.string.delete_transaction_finish_message))
+                        .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                            view.findNavController().navigateUp()
+                        }
+                        .show()
+                }
+            }
+            catch (e : RuntimeException){
+                withContext(Main){
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(resources.getString(R.string.delete_transaction_error_title))
+                        .setMessage(resources.getString(R.string.delete_transaction_error_message))
+                        .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                            //Do nothing
+                            Log.e(Constants.AUTHOR_NAME, e.toString())
+                        }
+                        .show()
+                }
+            }
         }
     }
 
@@ -126,7 +192,12 @@ class TransactionDetailFragment : Fragment() {
             )
             withContext(Main) {
                 if (sign.isSuccessful) {
-                    Log.e(Constants.AUTHOR_NAME, "Transaction Success!")
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(resources.getString(R.string.request_signature_success_title))
+                        .setMessage(resources.getString(R.string.request_signature_success_message))
+                        .setPositiveButton(resources.getString(R.string.ok_label)) { dialog, which ->
+                        }
+                        .show()
                 }
                 else {
                     handlingResponseCodes(sign)

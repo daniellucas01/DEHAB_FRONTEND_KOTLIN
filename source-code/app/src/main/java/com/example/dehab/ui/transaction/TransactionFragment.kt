@@ -14,7 +14,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 
 class TransactionFragment : Fragment() {
 
-    private lateinit var transactionViewModel: TransactionViewModel
     private lateinit var transcationViewPageAdapter: TransactionViewPagerAdapter
     private var transactionTabLayoutTitle = arrayListOf<String>()
     private var _binding: FragmentTransactionBinding? = null
@@ -25,8 +24,7 @@ class TransactionFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-//        transactionViewModel =
-//                ViewModelProviders.of(this).get(TransactionViewModel::class.java)
+
         _binding = FragmentTransactionBinding.inflate(inflater, container, false)
         return binding.root
     }
